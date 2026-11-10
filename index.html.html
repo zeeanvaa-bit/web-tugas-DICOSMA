@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudiPrioritas - Aplikasi Prioritas Belajar & Tugas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-indigo-600 p-2 rounded-lg font-bold text-xl shadow">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">StudiPrioritas</h1>
+                    <p class="text-xs text-indigo-200">Asisten Prioritas Tugas & Belajar Siswa</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-700 text-white transition">
+                    <i class="fa-solid fa-list-check mr-1.5"></i>Daftar Tugas
+                </button>
+                <button onclick="switchTab('eisenhower')" id="nav-eisenhower" class="px-3 py-2 rounded-md text-sm font-medium text-indigo-100 hover:bg-indigo-500 hover:text-white transition">
+                    <i class="fa-solid fa-border-all mr-1.5"></i>Matriks Prioritas
+                </button>
+                <button onclick="switchTab('pomodoro')" id="nav-pomodoro" class="px-3 py-2 rounded-md text-sm font-medium text-indigo-100 hover:bg-indigo-500 hover:text-white transition">
+                    <i class="fa-solid fa-clock mr-1.5"></i>Fokus Pomodoro
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: DASHBOARD & MANAGEMENT -->
+        <div id="tab-dashboard" class="space-y-6">
+            <!-- Top Stats Summary -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Tugas</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-tasks"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-rose-500 uppercase tracking-wider">Prioritas Utama</p>
+                        <h3 class="text-2xl font-bold text-rose-600 mt-1" id="stat-urgent">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Estimasi Waktu</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-time">0 jam</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Selesai</p>
+                        <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-completed">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Split: Input Form & Task List -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Task Input Form -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 h-fit lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-circle-plus text-indigo-600 mr-2"></i>Tambah Tugas / Mata Pelajaran
+                    </h2>
+                    
+                    <form id="task-form" onsubmit="handleAddTask(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Tugas / Materibelajar</label>
+                            <input type="text" id="task-title" required placeholder="Contoh: PR Matematika Bab 3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mata Pelajaran / Kategori</label>
+                            <input type="text" id="task-subject" required placeholder="Contoh: Matematika, Fisika, B. Indo" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tingkat Kepentingan</label>
+                                <select id="task-importance" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                                    <option value="high">Tinggi (Ujian/Bobot Besar)</option>
+                                    <option value="medium" selected>Sedang (Tugas Rutin)</option>
+                                    <option value="low">Rendah (Bacaan Opsional)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tingkat Urgensi</label>
+                                <select id="task-urgency" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                                    <option value="high">Mendesak (Besok/Hari ini)</option>
+                                    <option value="medium" selected>Sedang (2-3 Hari)</option>
+                                    <option value="low">Santai (Minggu Depan)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tenggat Waktu (Deadline)</label>
+                                <input type="date" id="task-deadline" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Estimasi Waktu (Menit)</label>
+                                <input type="number" id="task-duration" min="5" step="5" value="30" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg text-sm shadow transition duration-150 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tambahkan ke Daftar</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Priority List View -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Daftar Prioritas Terurut Auto</h2>
+                            <p class="text-xs text-slate-500">Diurutkan berdasarkan Algoritma Smart Priority Score</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <select id="filter-status" onchange="renderTasks()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                                <option value="all">Semua Status</option>
+                                <option value="pending">Belum Selesai</option>
+                                <option value="completed">Sudah Selesai</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Task Items Container -->
+                    <div id="tasks-container" class="space-y-3 max-h-[550px] overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- Dynamic tasks inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: EISENHOWER MATRIX VIEW -->
+        <div id="tab-eisenhower" class="hidden space-y-4">
+            <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-indigo-900 text-base">Matriks Eisenhower Belajar</h2>
+                    <p class="text-xs text-indigo-700">Membantu kamu membagi fokus berdasarkan tingkat Kepentingan & Urgensi.</p>
+                </div>
+                <span class="text-xs bg-indigo-200 text-indigo-800 px-3 py-1 rounded-full font-semibold hidden sm:inline-block">Auto-Categorized</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Q1: Kerjakan Sekarang (Do First) -->
+                <div class="bg-rose-50 border-2 border-rose-200 rounded-xl p-4 min-h-[250px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-rose-800 text-sm flex items-center">
+                            <i class="fa-solid fa-bolt mr-2"></i>1. KERJAKAN SEKARANG
+                        </span>
+                        <span class="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded font-semibold">Penting & Mendesak</span>
+                    </div>
+                    <div id="matrix-q1" class="space-y-2 flex-grow overflow-y-auto max-h-[300px] custom-scrollbar">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- Q2: Jadwalkan (Schedule) -->
+                <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 min-h-[250px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-indigo-800 text-sm flex items-center">
+                            <i class="fa-solid fa-calendar-days mr-2"></i>2. JADWALKAN
+                        </span>
+                        <span class="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded font-semibold">Penting, Tidak Mendesak</span>
+                    </div>
+                    <div id="matrix-q2" class="space-y-2 flex-grow overflow-y-auto max-h-[300px] custom-scrollbar">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- Q3: Delegasikan / Sederhanakan (Delegate/Minimize) -->
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 min-h-[250px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-amber-800 text-sm flex items-center">
+                            <i class="fa-solid fa-user-group mr-2"></i>3. SECEPATNYA / MINTA BANTUAN
+                        </span>
+                        <span class="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded font-semibold">Tidak Penting, Mendesak</span>
+                    </div>
+                    <div id="matrix-q3" class="space-y-2 flex-grow overflow-y-auto max-h-[300px] custom-scrollbar">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- Q4: Eliminasi / Nanti (Eliminate) -->
+                <div class="bg-slate-100 border-2 border-slate-200 rounded-xl p-4 min-h-[250px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="font-bold text-slate-700 text-sm flex items-center">
+                            <i class="fa-solid fa-trash-can mr-2"></i>4. KERJAKAN NANTI
+                        </span>
+                        <span class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-semibold">Tidak Penting & Tidak Mendesak</span>
+                    </div>
+                    <div id="matrix-q4" class="space-y-2 flex-grow overflow-y-auto max-h-[300px] custom-scrollbar">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: POMODORO TIMER -->
+        <div id="tab-pomodoro" class="hidden max-w-xl mx-auto space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-6">
+                <div>
+                    <span id="timer-mode-badge" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold uppercase tracking-wider">
+                        Sesi Belajar Fokus
+                    </span>
+                    <h2 class="text-xl font-bold text-slate-800 mt-2">Pengatur Waktu Pomodoro</h2>
+                    <p class="text-xs text-slate-500">Fokus 25 menit, lalu istirahat 5 menit untuk menjaga kesegaran otak.</p>
+                </div>
+
+                <!-- Target Task Selection for Pomodoro -->
+                <div class="text-left bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Sedang Mengerjakan:</label>
+                    <select id="pomodoro-task-select" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Tugas Dari Daftar --</option>
+                    </select>
+                </div>
+
+                <!-- Display Timer -->
+                <div class="py-6">
+                    <div class="text-6xl sm:text-7xl font-extrabold text-slate-800 tracking-tight font-mono" id="timer-display">
+                        25:00
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-center items-center space-x-4">
+                    <button id="btn-timer-start" onclick="toggleTimer()" class="w-32 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-play" id="timer-icon"></i>
+                        <span id="timer-btn-text">Mulai</span>
+                    </button>
+                    <button onclick="resetTimer()" class="w-12 h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl flex items-center justify-center transition">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+
+                <!-- Mode Toggles -->
+                <div class="flex justify-center space-x-2 pt-4 border-t border-slate-100 text-xs">
+                    <button onclick="setTimerMode('work')" class="px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">Fokus (25m)</button>
+                    <button onclick="setTimerMode('shortBreak')" class="px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">Istirahat Singkat (5m)</button>
+                    <button onclick="setTimerMode('longBreak')" class="px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100">Istirahat Panjang (15m)</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Toast / Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- Application Logic Script -->
+    <script>
+        // State Management
+        let tasks = [];
+        let timerInterval = null;
+        let timerTimeLeft = 25 * 60; // Default 25 minutes
+        let timerIsRunning = false;
+        let timerMode = 'work'; // 'work', 'shortBreak', 'longBreak'
+
+        // Initial Sample Data (if localStorage empty)
+        const sampleTasks = [
+            {
+                id: '1',
+                title: 'Persiapan Ujian Tengah Semester (UTS)',
+                subject: 'Fisika',
+                importance: 'high',
+                urgency: 'high',
+                deadline: getFormattedDate(1), // Tomorrow
+                duration: 90,
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: '2',
+                title: 'Mengerjakan LKS Hal 45-48',
+                subject: 'Matematika',
+                importance: 'high',
+                urgency: 'medium',
+                deadline: getFormattedDate(3),
+                duration: 45,
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: '3',
+                title: 'Membaca Cerpen Bab 2',
+                subject: 'Bahasa Indonesia',
+                importance: 'low',
+                urgency: 'low',
+                deadline: getFormattedDate(5),
+                duration: 30,
+                completed: true,
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        // Utility: Get Formatted Date relative to today
+        function getFormattedDate(daysFromNow = 0) {
+            const date = new Date();
+            date.setDate(date.getDate() + daysFromNow);
+            return date.toISOString().split('T')[0];
+        }
+
+        // Initialize App
+        window.onload = function() {
+            // Load tasks from LocalStorage or seed with samples
+            const savedTasks = localStorage.getItem('studi_prioritas_tasks');
+            if (savedTasks) {
+                try {
+                    tasks = JSON.parse(savedTasks);
+                } catch (e) {
+                    tasks = sampleTasks;
+                }
+            } else {
+                tasks = sampleTasks;
+                saveTasks();
+            }
+
+            // Set default date input to today
+            document.getElementById('task-deadline').value = getFormattedDate(1);
+
+            renderAll();
+        };
+
+        // Save tasks to LocalStorage
+        function saveTasks() {
+            localStorage.setItem('studi_prioritas_tasks', JSON.stringify(tasks));
+        }
+
+        // Calculate Smart Priority Score
+        // Formula considering Importance, Urgensi, and Days remaining until deadline
+        function calculatePriorityScore(task) {
+            if (task.completed) return -1; // Completed items move to the bottom
+
+            let score = 0;
+
+            // Importance Points
+            if (task.importance === 'high') score += 40;
+            else if (task.importance === 'medium') score += 20;
+            else score += 10;
+
+            // Urgency Points
+            if (task.urgency === 'high') score += 40;
+            else if (task.urgency === 'medium') score += 20;
+            else score += 10;
+
+            // Deadline Proximity Calculation
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const dueDate = new Date(task.deadline);
+            dueDate.setHours(0,0,0,0);
+
+            const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 0) score += 30; // Overdue or today
+            else if (diffDays === 1) score += 25; // Tomorrow
+            else if (diffDays <= 3) score += 15;
+            else if (diffDays <= 7) score += 5;
+
+            return score;
+        }
+
+        // Handle Add New Task
+        function handleAddTask(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('task-title').value.trim();
+            const subject = document.getElementById('task-subject').value.trim();
+            const importance = document.getElementById('task-importance').value;
+            const urgency = document.getElementById('task-urgency').value;
+            const deadline = document.getElementById('task-deadline').value;
+            const duration = parseInt(document.getElementById('task-duration').value) || 30;
+
+            if (!title || !subject || !deadline) return;
+
+            const newTask = {
+                id: Date.now().toString(),
+                title,
+                subject,
+                importance,
+                urgency,
+                deadline,
+                duration,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            renderAll();
+
+            // Reset Form
+            document.getElementById('task-form').reset();
+            document.getElementById('task-deadline').value = getFormattedDate(1);
+            document.getElementById('task-duration').value = "30";
+
+            showToast('Tugas berhasil ditambahkan ke daftar!');
+        }
+
+        // Toggle Task Completion State
+        function toggleTaskComplete(id) {
+            tasks = tasks.map(t => {
+                if (t.id === id) {
+                    const updatedStatus = !t.completed;
+                    showToast(updatedStatus ? 'Tugas diselesaikan! Bagus sekali 🎉' : 'Status tugas dikembalikan');
+                    return { ...t, completed: updatedStatus };
+                }
+                return t;
+            });
+            saveTasks();
+            renderAll();
+        }
+
+        // Delete Task
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderAll();
+            showToast('Tugas telah dihapus');
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['dashboard', 'eisenhower', 'pomodoro'];
+            tabs.forEach(tab => {
+                const el = document.getElementById(`tab-${tab}`);
+                const nav = document.getElementById(`nav-${tab}`);
+                if (tab === tabName) {
+                    el.classList.remove('hidden');
+                    nav.classList.add('bg-indigo-700', 'text-white');
+                    nav.classList.remove('text-indigo-100', 'hover:bg-indigo-500');
+                } else {
+                    el.classList.add('hidden');
+                    nav.classList.remove('bg-indigo-700', 'text-white');
+                    nav.classList.add('text-indigo-100', 'hover:bg-indigo-500');
+                }
+            });
+        }
+
+        // Global Render Function
+        function renderAll() {
+            renderStats();
+            renderTasks();
+            renderEisenhowerMatrix();
+            updatePomodoroTaskDropdown();
+        }
+
+        // Render Summary Stats
+        function renderStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const highPriority = tasks.filter(t => !t.completed && (t.importance === 'high' || t.urgency === 'high')).length;
+            
+            const totalMinutes = tasks
+                .filter(t => !t.completed)
+                .reduce((sum, t) => sum + parseInt(t.duration || 0), 0);
+            
+            const hours = (totalMinutes / 60).toFixed(1);
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-urgent').innerText = highPriority;
+            document.getElementById('stat-time').innerText = `${hours} jam`;
+            document.getElementById('stat-completed').innerText = completed;
+        }
+
+        // Render Ordered Task List
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            const filterStatus = document.getElementById('filter-status').value;
+
+            // Sort tasks by calculated priority score descending
+            let filteredTasks = [...tasks];
+            if (filterStatus === 'pending') {
+                filteredTasks = filteredTasks.filter(t => !t.completed);
+            } else if (filterStatus === 'completed') {
+                filteredTasks = filteredTasks.filter(t => t.completed);
+            }
+
+            filteredTasks.sort((a, b) => calculatePriorityScore(b) - calculatePriorityScore(a));
+
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <i class="fa-solid fa-clipboard-check text-4xl text-slate-300 mb-2"></i>
+                        <p class="text-sm font-medium text-slate-500">Tidak ada tugas ditemukan</p>
+                        <p class="text-xs text-slate-400 mt-1">Tambahkan tugas baru melalui formulir di samping</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredTasks.map((task, index) => {
+                const score = calculatePriorityScore(task);
+                
+                // Priority Badge Color
+                let badgeColor = "bg-slate-100 text-slate-700";
+                let badgeText = "Normal";
+                if (!task.completed) {
+                    if (score >= 80) {
+                        badgeColor = "bg-rose-100 text-rose-700 border-rose-200";
+                        badgeText = "Prioritas Utama";
+                    } else if (score >= 50) {
+                        badgeColor = "bg-amber-100 text-amber-700 border-amber-200";
+                        badgeText = "Prioritas Sedang";
+                    } else {
+                        badgeColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+                        badgeText = "Prioritas Rendah";
+                    }
+                }
+
+                return `
+                    <div class="p-4 rounded-xl border transition-all ${task.completed ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-white border-slate-200 hover:shadow-md'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-start space-x-3 w-full sm:w-auto">
+                            <button onclick="toggleTaskComplete('${task.id}')" class="mt-0.5 text-xl text-slate-400 hover:text-indigo-600 transition">
+                                <i class="fa-${task.completed ? 'solid fa-circle-check text-emerald-500' : 'regular fa-circle'}"></i>
+                            </button>
+                            <div>
+                                <div class="flex items-center space-x-2 flex-wrap">
+                                    <h4 class="font-semibold text-sm text-slate-800 ${task.completed ? 'line-through text-slate-500' : ''}">${escapeHtml(task.title)}</h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${badgeText}</span>
+                                </div>
+                                <div class="flex items-center space-x-3 mt-1.5 text-xs text-slate-500 flex-wrap gap-y-1">
+                                    <span class="bg-indigo-50 text-indigo-700 font-medium px-2 py-0.5 rounded">
+                                        <i class="fa-solid fa-book mr-1"></i>${escapeHtml(task.subject)}
+                                    </span>
+                                    <span>
+                                        <i class="fa-regular fa-calendar mr-1"></i>Deadline: ${task.deadline}
+                                    </span>
+                                    <span>
+                                        <i class="fa-regular fa-clock mr-1"></i>${task.duration} mnt
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
+                            <button onclick="deleteTask('${task.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus Tugas">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Eisenhower Matrix Grid
+        function renderEisenhowerMatrix() {
+            const q1 = document.getElementById('matrix-q1');
+            const q2 = document.getElementById('matrix-q2');
+            const q3 = document.getElementById('matrix-q3');
+            const q4 = document.getElementById('matrix-q4');
+
+            q1.innerHTML = ''; q2.innerHTML = ''; q3.innerHTML = ''; q4.innerHTML = '';
+
+            const pendingTasks = tasks.filter(t => !t.completed);
+
+            if (pendingTasks.length === 0) {
+                const emptyMsg = `<p class="text-xs text-slate-400 italic text-center py-4">Belum ada tugas</p>`;
+                q1.innerHTML = emptyMsg; q2.innerHTML = emptyMsg; q3.innerHTML = emptyMsg; q4.innerHTML = emptyMsg;
+                return;
+            }
+
+            pendingTasks.forEach(task => {
+                const isHighImp = task.importance === 'high';
+                const isHighUrg = task.urgency === 'high';
+
+                const cardHtml = `
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm text-xs">
+                        <div class="font-semibold text-slate-800">${escapeHtml(task.title)}</div>
+                        <div class="flex justify-between items-center mt-1 text-[11px] text-slate-500">
+                            <span class="text-indigo-600 font-medium">${escapeHtml(task.subject)}</span>
+                            <span>${task.deadline}</span>
+                        </div>
+                    </div>
+                `;
+
+                if (isHighImp && isHighUrg) q1.innerHTML += cardHtml;
+                else if (isHighImp && !isHighUrg) q2.innerHTML += cardHtml;
+                else if (!isHighImp && isHighUrg) q3.innerHTML += cardHtml;
+                else q4.innerHTML += cardHtml;
+            });
+        }
+
+        // Pomodoro Timer Logic
+        function updatePomodoroTaskDropdown() {
+            const select = document.getElementById('pomodoro-task-select');
+            const pendingTasks = tasks.filter(t => !t.completed);
+            
+            select.innerHTML = '<option value="">-- Pilih Tugas Dari Daftar --</option>' + 
+                pendingTasks.map(t => `<option value="${t.id}">${escapeHtml(t.subject)} - ${escapeHtml(t.title)}</option>`).join('');
+        }
+
+        function setTimerMode(mode) {
+            timerMode = mode;
+            clearInterval(timerInterval);
+            timerIsRunning = false;
+            
+            const badge = document.getElementById('timer-mode-badge');
+            
+            if (mode === 'work') {
+                timerTimeLeft = 25 * 60;
+                badge.innerText = 'Sesi Belajar Fokus';
+                badge.className = 'px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold uppercase tracking-wider';
+            } else if (mode === 'shortBreak') {
+                timerTimeLeft = 5 * 60;
+                badge.innerText = 'Istirahat Singkat';
+                badge.className = 'px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold uppercase tracking-wider';
+            } else if (mode === 'longBreak') {
+                timerTimeLeft = 15 * 60;
+                badge.innerText = 'Istirahat Panjang';
+                badge.className = 'px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold uppercase tracking-wider';
+            }
+
+            updateTimerDisplay();
+            updateTimerControls();
+        }
+
+        function toggleTimer() {
+            if (timerIsRunning) {
+                clearInterval(timerInterval);
+                timerIsRunning = false;
+            } else {
+                timerIsRunning = true;
+                timerInterval = setInterval(() => {
+                    if (timerTimeLeft > 0) {
+                        timerTimeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerIsRunning = false;
+                        showToast('Waktu sesi Pomodoro telah selesai! ⏰');
+                        updateTimerControls();
+                    }
+                }, 1000);
+            }
+            updateTimerControls();
+        }
+
+        function resetTimer() {
+            setTimerMode(timerMode);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerTimeLeft / 60);
+            const seconds = timerTimeLeft % 60;
+            document.getElementById('timer-display').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerControls() {
+            const btnText = document.getElementById('timer-btn-text');
+            const icon = document.getElementById('timer-icon');
+            
+            if (timerIsRunning) {
+                btnText.innerText = 'Jeda';
+                icon.className = 'fa-solid fa-pause';
+            } else {
+                btnText.innerText = 'Mulai';
+                icon.className = 'fa-solid fa-play';
+            }
+        }
+
+        // Notification System
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-800 text-white text-xs sm:text-sm py-2.5 px-4 rounded-xl shadow-xl flex items-center space-x-2 transition transform translate-y-2 opacity-0';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400"></i><span>${escapeHtml(message)}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Helper: Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
